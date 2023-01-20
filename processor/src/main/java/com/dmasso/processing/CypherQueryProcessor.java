@@ -1,17 +1,23 @@
 package com.dmasso.processing;
 
 import com.dmasso.data.BaseQueryExecutor;
-import com.dmasso.routing.DbType;
-import com.dmasso.routing.Router;
+import com.dmasso.routing.BaseRouter;
+import com.dmasso.routing.enums.DbType;
 import com.dmasso.translation.BaseTranslator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-public class CypherQueryProcessor<QT> implements QueryProcessor<String, QT> {
-    private Router<String> router;
-    private Map<DbType, BaseTranslator<String, ? extends QT>> typeTranslatorMap;
-    private Map<DbType, BaseQueryExecutor<QT, ? extends Iterable<?>>> typeExecutorMap;
+@Service
+@RequiredArgsConstructor
+public class CypherQueryProcessor<QT> implements QueryProcessor<String, BaseTranslator<String, QT>, Iterable<?>> {
+    private final BaseRouter<String> router;
+    private final Map<DbType, BaseTranslator<String, ? extends QT>> typeTranslatorMap;
+    private final Map<DbType, BaseQueryExecutor<QT, ? extends Iterable<?>>> typeExecutorMap;
 
+
+    @Override
     public Iterable<?> execute(String query) {
         DbType dbType = router.route(query);
         BaseTranslator<String, ? extends QT> suitableTranslator = typeTranslatorMap.get(dbType);

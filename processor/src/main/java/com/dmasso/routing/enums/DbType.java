@@ -1,4 +1,4 @@
-package com.dmasso.routing;
+package com.dmasso.routing.enums;
 
 public enum DbType {
     OLAP,
