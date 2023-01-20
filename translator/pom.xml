@@ -23,7 +23,7 @@
             <artifactId>parent</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/cypher2sql-jar-with-dependencies.jar</systemPath>
+            <systemPath>C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\libs\cypher2sql-jar-with-dependencies.jar</systemPath>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.github.vincentrussell</groupId>-->
