@@ -11,13 +11,13 @@
 
     <artifactId>translator</artifactId>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>com.github.vincentrussell</groupId>
+            <artifactId>sql-to-mongo-db-query-converter</artifactId>
+            <version>1.21</version>
+
+        </dependency>
         <dependency>
             <groupId>org.cytosm</groupId>
             <artifactId>parent</artifactId>
@@ -25,11 +25,11 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/cypher2sql-jar-with-dependencies.jar</systemPath>
         </dependency>
-        <dependency>
-            <groupId>com.github.vincentrussell</groupId>
-            <artifactId>sql-to-mongo-db-query-converter</artifactId>
-            <version>1.21</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.vincentrussell</groupId>-->
+<!--            <artifactId>sql-to-mongo-db-query-converter</artifactId>-->
+<!--            <version>1.21-standalone</version>-->
+<!--        </dependency>-->
     </dependencies>
 
 </project>
