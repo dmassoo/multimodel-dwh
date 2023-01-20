@@ -8,6 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 public class CypherStringQueryRouter implements Router<String> {
     @Override
     public DbType route(String query) {
+        // TODO: 20.01.2023 actual implementation required later
         return DbType.GRAPH;
     }
 }
