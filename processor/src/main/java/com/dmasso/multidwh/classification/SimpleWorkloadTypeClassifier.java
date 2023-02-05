@@ -3,7 +3,9 @@ package com.dmasso.multidwh.classification;
 import com.dmasso.multidwh.common.enums.DbType;
 import org.apache.commons.lang.NotImplementedException;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +19,9 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             Set.of("count(", "collect(", "sum(", "percentileDisc(", "percentileCont(", "stDev(", "stDevP(");
     private static final Set<String> STRING_MATCHING = Set.of("STARTS WITH", "ENDS WITH", "CONTAINS");
     private static final Set<String> COMPARISONS = Set.of("=", "<>", "<", ">", "<=", ">=", "IS NULL", "IS NOT NULL");
+
+    private static final Set<String> GRAPH_PATH_RELATIONSHIP_FUNCTIONS =
+            Set.of("length(", "nodes(", "relationships(", "count{", "shortestPath(", "allShortestPaths(");
 
 
     public SimpleWorkloadTypeClassifier() {
@@ -34,7 +39,41 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean isGraph(String query) {
-        throw new NotImplementedException();
+        if (query.contains("*") || GRAPH_PATH_RELATIONSHIP_FUNCTIONS.stream().anyMatch(query::contains)) {
+            // variable length path, path functions, relationships (i.e. focus on paths and relationships
+            return true;
+        }
+        if(containsSelfJoins(query)) {
+            return true;
+        }
+        if (severalRelationships(query)) {
+            return true;
+        }
+        if (complexPathPattern(query)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean containsSelfJoins(String  query) {
+        String typePattern = "\\(.:(.*?).*?\\)";
+        Pattern compile = Pattern.compile(typePattern);
+        Matcher matcher = compile.matcher(query);
+        List<String> types = new ArrayList<>();
+        while (matcher.find()) {
+            types.add(matcher.group(1));
+        }
+        return Set.of(types).size() != types.size();
+    }
+
+    private boolean severalRelationships(String query) {
+        String relationships = "\\[.:.*?(!.*?|.*?[|&].*?)\\]";
+        Pattern compile = Pattern.compile(relationships);
+        return false;
+    }
+
+    private boolean complexPathPattern(String query) {
+        return false;
     }
 
     private boolean isKeyValue(String query) {
@@ -81,24 +120,9 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     public static void main(String[] args) {
         SimpleWorkloadTypeClassifier simpleWorkloadTypeClassifier = new SimpleWorkloadTypeClassifier();
-        simpleWorkloadTypeClassifier.prepareKeyValuePatterns();
-        KEY_VALUE_QUERY_PATTERNS.forEach(System.out::println);
 
-        var testQuery = "MATCH (e:Person) " +
-                "WHERE e.firstName = 'John' " +
-                "RETURN e";
-        String query = simpleWorkloadTypeClassifier.prepareForClassification(testQuery);
-        String matchingPattern = null;
-        for (String pattern : KEY_VALUE_QUERY_PATTERNS) {
-            if (query.matches(pattern)) matchingPattern = pattern;
-        }
-        if (matchingPattern != null) {
-            Pattern regex = Pattern.compile(matchingPattern);
-            Matcher matcher = regex.matcher(query);
-            matcher.find(); // it is required to run matcher engine
-            String entityName = matcher.group(1);
-            String attribute = matcher.group(2);
-            String value = matcher.group(3);
-        }
+        String query = "MATCH (n:Person {name: 'Alice'})-->(m:Person) RETURN m AS node";
+        query = simpleWorkloadTypeClassifier.prepareForClassification(query);
+        System.out.println(simpleWorkloadTypeClassifier.containsSelfJoins(query));
     }
 }
