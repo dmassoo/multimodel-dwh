@@ -68,7 +68,11 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private boolean severalRelationships(String query) {
         String relationships = "\\[.:.*?(!.*?|.*?[|&].*?)\\]";
-        Pattern compile = Pattern.compile(relationships);
+        Pattern pattern = Pattern.compile(relationships);
+        Matcher matcher = pattern.matcher(query);
+        if (matcher.find()) {
+            return true;
+        }
         return false;
     }
 
@@ -121,8 +125,8 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     public static void main(String[] args) {
         SimpleWorkloadTypeClassifier simpleWorkloadTypeClassifier = new SimpleWorkloadTypeClassifier();
 
-        String query = "MATCH (n:Person {name: 'Alice'})-->(m:Person) RETURN m AS node";
+        String query = "MATCH (n:Label)-[r:R1]→(m:Label) RETURN r.name AS name";
         query = simpleWorkloadTypeClassifier.prepareForClassification(query);
-        System.out.println(simpleWorkloadTypeClassifier.containsSelfJoins(query));
+        System.out.println(simpleWorkloadTypeClassifier.severalRelationships(query));
     }
 }
