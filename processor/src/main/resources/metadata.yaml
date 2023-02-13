@@ -91,16 +91,16 @@ entities:
         cardinality: 2900
         olap:
           type: date
-          name: release_date
+          name: born
         oltp:
           type: date
-          name: release_date
+          name: born
         key-value:
           type: date
-          name: release_date
+          name: born
         graph:
           type: date
-          name: released
+          name: born
       - gender:
           cardinality: 2
         olap:
