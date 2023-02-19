@@ -44,7 +44,6 @@
             <version>2.1.214</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
@@ -72,6 +71,12 @@
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/cypher2sql-jar-with-dependencies.jar</systemPath>
+        </dependency>
+        <!--    Metadata    -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.33</version>
         </dependency>
     </dependencies>
 
