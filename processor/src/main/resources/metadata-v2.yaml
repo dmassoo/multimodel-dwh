@@ -24,19 +24,18 @@ entities:
         orientation: row
         index:
           - id
-      - graph:
-        index:
-          - id
-          - tagline
   - person:
     cardinality: 3000
     schema:
       - name: id
         type: UUID
+        cardinality: 3000
       - name: full_name
         type: String
+        cardinality: 2900
       - name: born
         type: String
+        cardinality: 150
     engines:
       - olap:
         orientation: column
@@ -48,8 +47,5 @@ entities:
         index:
           - id
           - born
-      - graph:
-        index:
-          - full_name
 
 
