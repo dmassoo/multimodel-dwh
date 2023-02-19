@@ -35,6 +35,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         if (isGraph(query)) return DbType.GRAPH;
         if (isOlap(query)) return DbType.OLAP;
         if (isOltp(query)) return DbType.OLTP;
+        // TODO: 19.02.2023 remove exception later and classify as OLTP for example (or graph)
         throw new RuntimeException("Classification error. Cannot classify query: " + query);
     }
 
@@ -49,10 +50,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         if (severalRelationships(query)) {
             return true;
         }
-        if (complexPathPattern(query)) {
-            return true;
-        }
-        return false;
+        return complexPathPattern(query);
     }
 
     private boolean containsSelfJoins(String  query) {
@@ -67,17 +65,29 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean severalRelationships(String query) {
-        String relationships = "\\[.:.*?(!.*?|.*?[|&].*?)\\]";
+        String relationships = "\\[.:.*?(!.*?|.*?[|&].*?)]";
         Pattern pattern = Pattern.compile(relationships);
         Matcher matcher = pattern.matcher(query);
-        if (matcher.find()) {
-            return true;
-        }
-        return false;
+        return matcher.find();
     }
 
     private boolean complexPathPattern(String query) {
-        return false;
+        String relationshipRegex = "\\[.:.*]";
+        String typeRegex = "\\(.:(.*?).*?\\)";
+        Pattern relationshipPattern = Pattern.compile(relationshipRegex);
+        Matcher relationshipMatcher = relationshipPattern.matcher(query);
+        Pattern typePattern = Pattern.compile(typeRegex);
+        Matcher typeMatcher = typePattern.matcher(query);
+        int relationships = 0;
+        int entities = 0;
+        while (relationshipMatcher.find()) {
+            relationships++;
+        }
+        while (typeMatcher.find()) {
+            entities++;
+        }
+        // path pattern is considered complex if there is more than one relationship block in the pattern
+        return relationships > 1 && entities > 2;
     }
 
     private boolean isKeyValue(String query) {
@@ -94,7 +104,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             String attribute = matcher.group(2);
             String value = matcher.group(3);
             return true;
-            // TODO: 05.02.2023 check the metadata whether the cache for this entity attribute as a key is present
+            // TODO: 05.02.2023 check the metadata whether the cache for this entity attribute as a key is present (in case of not full redundancy)
         }
         return false;
     }
@@ -125,7 +135,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     public static void main(String[] args) {
         SimpleWorkloadTypeClassifier simpleWorkloadTypeClassifier = new SimpleWorkloadTypeClassifier();
 
-        String query = "MATCH (n:Label)-[r:R1]→(m:Label) RETURN r.name AS name";
+        String query = "MATCH (n:Label)-[r:(R1|Rel2)&Rel3]→(m:Label) RETURN r.name AS name";
         query = simpleWorkloadTypeClassifier.prepareForClassification(query);
         System.out.println(simpleWorkloadTypeClassifier.severalRelationships(query));
     }
