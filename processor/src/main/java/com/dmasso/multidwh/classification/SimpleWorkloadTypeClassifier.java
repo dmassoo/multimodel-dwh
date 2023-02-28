@@ -1,10 +1,7 @@
 package com.dmasso.multidwh.classification;
 
 import com.dmasso.multidwh.common.enums.DbType;
-import com.dmasso.multidwh.metadata.Entity;
-import com.dmasso.multidwh.metadata.FieldData;
-import com.dmasso.multidwh.metadata.Metadata;
-import com.dmasso.multidwh.metadata.MetadataUtility;
+import com.dmasso.multidwh.metadata.*;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.util.*;
@@ -14,6 +11,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> {
+
+    private static final String OLAP = "OLAP";
+    private static final String ROW = "ROW";
     private static final Set<String> KEY_VALUE_QUERY_PATTERNS =
             new HashSet<>(Set.of("MATCH \\(e:entityName \\{entityAttribute: value\\}\\) RETURN e",
                     "MATCH \\(e:entityName\\) WHERE e.entityAttribute = value RETURN e"));
@@ -134,7 +134,10 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         if (OLAP_LIKE_COMPARISON_SIGNS.stream().anyMatch(query::contains)) {
             return true;
         }
-        return isLowEqualsPredicateCardinality(query);
+        if (isLowEqualsPredicateCardinality(query)) {
+            return true;
+        }
+        return fewColumnsReturnColumnOriented(query);
     }
 
     private boolean isLowEqualsPredicateCardinality(String query) {
@@ -198,8 +201,36 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         return typesToPredicateAttributes;
     }
 
-    private boolean fewColumnsReturn(String query) {
-        //todo use entity orientation metadata
+    private boolean fewColumnsReturnColumnOriented(String query) {
+        Map<String, String> aliasesToTypes = getAliasesToTypes(query);
+        String type;
+        if (aliasesToTypes.values().size() == 1) {
+            type = aliasesToTypes.values().stream().findFirst().get();
+            Map<String, Entity> nameToEntity = getNameToEntity(type);
+            Entity entity = nameToEntity.get(type);
+            Optional<Engine> olapEngineOpt = entity.getEngines().stream().filter(e -> e.getType().equals(OLAP)).findFirst();
+            if (olapEngineOpt.isPresent()) {
+                Engine engine = olapEngineOpt.get();
+                if (engine.getOrientation().equals(ROW)) {
+                    return false;
+                }
+            }
+            int attrsNumber = entity.getSchema().size();
+            String[] split = query.split("RETURN|return");
+            int length = split.length;
+            String partAfterReturn = split[length - 1];
+            String attrsReturnPattern = "\\w*\\.(\\w*)";
+            Pattern compile = Pattern.compile(attrsReturnPattern);
+            Matcher matcher = compile.matcher(partAfterReturn);
+            List<String> attrNames = new ArrayList<>();
+            while (matcher.find()) {
+                String attrName = matcher.group(1);
+                attrNames.add(attrName);
+            }
+            return attrsNumber / attrNames.size() <= 4;
+
+        }
+
         return false;
     }
 
