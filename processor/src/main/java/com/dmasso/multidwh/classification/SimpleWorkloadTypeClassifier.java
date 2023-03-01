@@ -2,7 +2,6 @@ package com.dmasso.multidwh.classification;
 
 import com.dmasso.multidwh.common.enums.DbType;
 import com.dmasso.multidwh.metadata.*;
-import org.apache.commons.lang.NotImplementedException;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -37,11 +36,22 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     @Override
     public DbType classify(String query) {
         query = prepareForClassification(query);
+        validateQuery(query);
         if (isKeyValue(query)) return DbType.KEY_VALUE;
         if (isGraph(query)) return DbType.GRAPH;
         return classifyOlapOltp(query);
     }
 
+    private void validateQuery(String query) {
+        Map<String, String> aliasesToTypes = getAliasesToTypes(query);
+        Collection<String> queryTypes = new HashSet<>(aliasesToTypes.values());
+        var existingTypes = metadata.getEntities().stream()
+                .flatMap(map -> map.values().stream())
+                .collect(Collectors.toSet());
+        if (!existingTypes.contains(queryTypes)) {
+            throw new IllegalArgumentException("Unknown entity type reference");
+        }
+    }
     private boolean isGraph(String query) {
         if (query.contains("*") || GRAPH_PATH_RELATIONSHIP_FUNCTIONS.stream().anyMatch(query::contains)) {
             // variable length path, path functions, relationships (i.e. focus on paths and relationships
@@ -106,10 +116,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             String entityName = matcher.group(1);
             String attribute = matcher.group(2);
             String value = matcher.group(3);
-            // TODO: 21.02.2023 вынести логику проверки существования типов сущностей наверх (перед классификацией)
-            getNameToEntity(entityName);
             return true;
-            // TODO: 05.02.2023 check the metadata whether the cache for this entity attribute as a key is present (in case of not full redundancy)
         }
         return false;
     }
@@ -120,8 +127,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             return DbType.OLAP;
         }
         // TODO: 21.02.2023 check indexed cols in predicates
-        // TODO: check few columns if column oriented
-        return null;
+        return dbTypeByIndexedPredicates(query);
     }
 
     private boolean isOlap(String query) {
@@ -234,17 +240,30 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         return false;
     }
 
-    private boolean indexedPredicate(String query, DbType dbType) {
+    private DbType dbTypeByIndexedPredicates(String query) {
+        String predicatePattern = ".*\s?=\s?.*";
+        Pattern pattern = Pattern.compile(predicatePattern);
+        Matcher matcher = pattern.matcher(query);
+        List<String> predicates = new ArrayList<>();
+        while (matcher.find()) {
+            predicates.add(matcher.group(0));
+        }
+        List<String[]> aliasDotAttrsInPredicate = predicates.stream()
+                .map(p -> p.replace(" ", ""))
+                .map(p -> p.split("=")[0].split("\\."))
+                .toList();
+        Map<String, String> aliasesToTypes = getAliasesToTypes(query);
+        Map<String, Set<String>> typesToAttributes =  getTypesToPredicateAttributes(query, aliasesToTypes);
+
+        // TODO: 28.02.2023 merge types-attributes in predicates by alias
+        // 1) DBType
+        // 2) Types
+        // 3) Aliases
+        // 4) Attributes in predicates
+        // 5) check indices in metadata
         // TODO: 21.02.2023 implement
         // method to check if predicate field is indexed in certain database
-        return false;
-    }
-
-    private boolean isOltp(String query) {
-        // TODO: 21.02.2023 мб, не нужен ????
-        // джойны могут быть проблемой
-        // точно будут при трансляции, но при классификации тоже могут
-        throw new NotImplementedException();
+        return DbType.OLAP;
     }
 
     private String prepareForClassification(String query) {
