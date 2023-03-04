@@ -2,6 +2,7 @@ package com.dmasso.multidwh.classification;
 
 import com.dmasso.multidwh.common.enums.DbType;
 import com.dmasso.multidwh.metadata.*;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -9,8 +10,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Service
 public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> {
 
+    public static final String TYPE_REGEX = "\\(.*?:(.*?)\\)";
+    public static final String PREDICATE_PATTERN = ".*\s?=\s?.*";
     private static final String OLAP = "OLAP";
     private static final String ROW = "ROW";
     private static final Set<String> KEY_VALUE_QUERY_PATTERNS =
@@ -35,14 +39,15 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     @Override
     public DbType classify(String query) {
+        // TODO: 04.03.2023 can be removed for end2end since prepared in CypherQueryProcessor
         query = prepareForClassification(query);
-        validateQuery(query);
+        validateQueryEntitiesExistence(query);
         if (isKeyValue(query)) return DbType.KEY_VALUE;
         if (isGraph(query)) return DbType.GRAPH;
         return classifyOlapOltp(query);
     }
 
-    private void validateQuery(String query) {
+    private void validateQueryEntitiesExistence(String query) {
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
         Collection<String> queryTypes = new HashSet<>(aliasesToTypes.values());
         var existingTypes = metadata.getEntities().stream()
@@ -67,14 +72,14 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean containsSelfJoins(String  query) {
-        String typePattern = "\\(.:(.*?).*?\\)";
+        String typePattern = "\\(.*?:(.*?).*?\\)";
         Pattern compile = Pattern.compile(typePattern);
         Matcher matcher = compile.matcher(query);
         List<String> types = new ArrayList<>();
         while (matcher.find()) {
             types.add(matcher.group(1));
         }
-        return Set.of(types).size() != types.size();
+        return types.size() != 0 && Set.of(types).size() != types.size();
     }
 
     private boolean severalRelationships(String query) {
@@ -170,15 +175,13 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private static Map<String, Entity> getNameToEntity(String type) {
-        Map<String, Entity> nameToEntity = metadata.getEntities().stream()
+        return metadata.getEntities().stream()
                 .filter(it -> it.containsKey(type)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Запрошенный тип объекта не определен: " + type));
-        return nameToEntity;
     }
 
     private Map<String, String> getAliasesToTypes(String query) {
-        String typeRegex = "\\(.*?:(.*?)\\)";
-        Pattern typePattern = Pattern.compile(typeRegex);
+        Pattern typePattern = Pattern.compile(TYPE_REGEX);
         Matcher typeMatcher = typePattern.matcher(query);
         var aliasesTypes = new ArrayList<String>();
         while(typeMatcher.find()) {
@@ -241,8 +244,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private DbType dbTypeByIndexedPredicates(String query) {
-        String predicatePattern = ".*\s?=\s?.*";
-        Pattern pattern = Pattern.compile(predicatePattern);
+        Pattern pattern = Pattern.compile(PREDICATE_PATTERN);
         Matcher matcher = pattern.matcher(query);
         List<String> predicates = new ArrayList<>();
         while (matcher.find()) {
@@ -254,7 +256,6 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                 .toList();
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
         Map<String, Set<String>> typesToAttributes =  getTypesToPredicateAttributes(query, aliasesToTypes);
-
         // TODO: 28.02.2023 merge types-attributes in predicates by alias
         // 1) DBType
         // 2) Types
@@ -263,7 +264,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         // 5) check indices in metadata
         // TODO: 21.02.2023 implement
         // method to check if predicate field is indexed in certain database
-        return DbType.OLAP;
+        return DbType.OLTP;
     }
 
     private String prepareForClassification(String query) {
