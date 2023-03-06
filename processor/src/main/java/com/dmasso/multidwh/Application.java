@@ -1,22 +1,31 @@
 package com.dmasso.multidwh;
 
-import com.dmasso.multidwh.translation.concrete.fromtext.CypherToSqlTranslator;
-import org.springframework.boot.SpringApplication;
+import com.dmasso.multidwh.processing.CypherQueryProcessor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.Scanner;
 
 @SpringBootApplication
-public class Application {
-    public static void main(String[] args) {
-        ConfigurableApplicationContext run = SpringApplication.run(Application.class, args);
-        // TODO: 21.01.2023 it works here, remove later
-        CypherToSqlTranslator bean = run.getBean(CypherToSqlTranslator.class);
-        String translate = bean.translate("""
-                MATCH (a:Person) WHERE a.firstName IN ['foo', 'bar']
-                RETURN a
-                """
-        );
-        System.out.println(translate);
-    }
+@RequiredArgsConstructor
+public class Application implements CommandLineRunner {
+    public static final String EXIT = "exit";
 
+    private final CypherQueryProcessor processor;
+
+
+    @Override
+    public void run(String... args) {
+        Scanner scanner;
+        while (true) {
+            scanner = new Scanner(System.in);
+            System.out.println("Enter query or type \"exit\":");
+            String query = scanner.nextLine();
+            if (EXIT.equals(query)) {
+                System.exit(0);
+            }
+            processor.execute(query);
+        }
+    }
 }
