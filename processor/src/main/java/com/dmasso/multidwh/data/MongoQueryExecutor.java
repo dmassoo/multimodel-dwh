@@ -8,11 +8,12 @@ import com.mongodb.client.MongoDatabase;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+
+@Deprecated(since = "document db is out of scope now")
+//@Component
 @RequiredArgsConstructor
 public class MongoQueryExecutor implements QueryExecutor<String> {
 

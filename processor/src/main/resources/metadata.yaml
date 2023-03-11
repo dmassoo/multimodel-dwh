@@ -1,0 +1,118 @@
+entities:
+  - movie:
+    cardinality: 10000
+    id:
+      olap:
+        type: UUID
+        name: id
+      oltp:
+        type: UUID
+        name: id
+      key-value:
+        type: UUID
+        name: id
+      graph:
+        type: UUID
+        name: id
+    attributes:
+      - title:
+        cardinality: 9950
+        olap:
+          type: String
+          name: title
+        oltp:
+          type: String
+          name: title
+        key-value:
+          type: String
+          name: title
+        graph:
+          type: String
+          name: title
+      - released:
+        cardinality: 9000
+        olap:
+          type: date
+          name: release_date
+        oltp:
+          type: date
+          name: release_date
+        key-value:
+          name: release_date
+        graph:
+          type: date
+          name: released
+      - tagline:
+        cardinality: 10000
+        olap:
+          type: String
+          name: tagline
+        oltp:
+          type: String
+          name: tagline
+  #     вот, например, довольно бессмысленный кэш
+#        key-value:
+#          type: String
+#          name: tagline
+        graph:
+          type: String
+          name: tagline
+  - person:
+    cardinality: 3000
+    id:
+      olap:
+        type: UUID
+        name: id
+      oltp:
+        type: UUID
+        name: id
+      key-value:
+        type: UUID
+        name: id
+      graph:
+        type: UUID
+        name: id
+    attributes:
+      - name:
+        cardinality: 2800
+        olap:
+          type: String
+          name: full_name
+        oltp:
+          type: String
+          name: full_name
+        key-value:
+          type: String
+          name: name
+        graph:
+          type: String
+          name: name
+      - born:
+        cardinality: 2900
+        olap:
+          type: date
+          name: born
+        oltp:
+          type: date
+          name: born
+        key-value:
+          type: date
+          name: born
+        graph:
+          type: date
+          name: born
+      - gender:
+          cardinality: 2
+        olap:
+          type: string
+          name: gender
+        oltp:
+          type: string
+          name: gender
+#        key-value:
+#          type: string
+#          name: sex
+        graph:
+          type: string
+          name: gender
+

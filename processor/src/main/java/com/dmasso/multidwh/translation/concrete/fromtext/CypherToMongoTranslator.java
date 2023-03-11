@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+@Deprecated(since = "document db is out of scope now")
 @Component
 @RequiredArgsConstructor
 public class CypherToMongoTranslator implements Translator {
