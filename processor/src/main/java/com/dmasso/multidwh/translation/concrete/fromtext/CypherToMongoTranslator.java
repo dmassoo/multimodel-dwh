@@ -5,13 +5,12 @@ import com.dmasso.multidwh.translation.Translator;
 import com.github.vincentrussell.query.mongodb.sql.converter.ParseException;
 import com.github.vincentrussell.query.mongodb.sql.converter.QueryConverter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Deprecated(since = "document db is out of scope now")
-@Component
+//@Component
 @RequiredArgsConstructor
 public class CypherToMongoTranslator implements Translator {
     private final CypherToSqlTranslator cypherToSqlTranslator;

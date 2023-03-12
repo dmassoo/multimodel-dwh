@@ -3,7 +3,7 @@ package com.dmasso.multidwh.processing;
 import com.dmasso.multidwh.classification.Classifier;
 import com.dmasso.multidwh.common.enums.DbType;
 import com.dmasso.multidwh.common.interfaces.DbTyped;
-import com.dmasso.multidwh.data.QueryExecutor;
+import com.dmasso.multidwh.execution.QueryExecutor;
 import com.dmasso.multidwh.translation.BaseTranslator;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
