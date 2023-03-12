@@ -1,4 +1,4 @@
-package com.dmasso.multidwh.data;
+package com.dmasso.multidwh.execution;
 
 import com.dmasso.multidwh.common.enums.DbType;
 import org.neo4j.driver.Driver;
