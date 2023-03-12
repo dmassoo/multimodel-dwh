@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 @Component
 public class RedisQueryExecutor implements QueryExecutor<String> {
-    // TODO: 12.03.2023 move connection props to config 
+    // TODO: 12.03.2023 move connection props to config
     private final JedisPool pool = new JedisPool("localhost", 6379);
 
     @Override
