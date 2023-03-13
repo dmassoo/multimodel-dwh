@@ -51,9 +51,9 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
         Collection<String> queryTypes = new HashSet<>(aliasesToTypes.values());
         var existingTypes = metadata.getEntities().stream()
-                .flatMap(map -> map.values().stream())
+                .flatMap(map -> map.keySet().stream())
                 .collect(Collectors.toSet());
-        if (!existingTypes.contains(queryTypes)) {
+        if (!existingTypes.containsAll(queryTypes)){
             throw new IllegalArgumentException("Unknown entity type reference");
         }
     }
@@ -160,6 +160,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                     String type = e.getKey();
                     Set<String> attrs = e.getValue();
                     Map<String, Entity> nameToEntity = getNameToEntity(type);
+                    //todo fix class cast exception
                     Entity entity = nameToEntity.get(type);
                     int cardinality = entity.getCardinality();
                     List<FieldData> schema = entity.getSchema();

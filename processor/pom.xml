@@ -32,6 +32,11 @@
             <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
         <!--    DB connectivity    -->
         <dependency>
             <groupId>org.jdbi</groupId>
@@ -54,11 +59,11 @@
             <artifactId>neo4j-java-driver</artifactId>
             <version>5.4.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.8.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mongodb</groupId>-->
+<!--            <artifactId>mongodb-driver-sync</artifactId>-->
+<!--            <version>4.8.2</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>

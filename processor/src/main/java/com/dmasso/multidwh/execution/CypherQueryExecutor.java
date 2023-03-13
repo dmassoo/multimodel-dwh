@@ -5,9 +5,8 @@ import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Query;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class CypherQueryExecutor implements QueryExecutor<String> {
     private final Driver driver;
 

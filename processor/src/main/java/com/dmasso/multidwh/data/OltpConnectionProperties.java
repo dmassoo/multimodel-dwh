@@ -2,14 +2,15 @@ package com.dmasso.multidwh.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@AllArgsConstructor
 @Getter
-@Setter
-//@ConfigurationProperties
+@AllArgsConstructor
+@ConfigurationProperties(prefix = "oltp")
+@EnableConfigurationProperties
 public class OltpConnectionProperties {
-    private String url = "jdbc:postgresql://localhost:5432/postgres";
-    String user = "postgres";
-    String password = "password";
+    private final String url = "jdbc:postgresql://localhost:5432/postgres";
+    private final String user = "postgres";
+    private final String password = "password";
 }
