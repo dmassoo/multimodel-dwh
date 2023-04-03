@@ -1,7 +1,7 @@
 package com.dmasso.multidwh;
 
 import com.dmasso.multidwh.data.OltpConnectionProperties;
-import com.dmasso.multidwh.execution.SqlQueryExecutor;
+import com.dmasso.multidwh.execution.OltpQueryExecutor;
 import org.jdbi.v3.core.Jdbi;
 
 public class JdbcSandbox {
@@ -21,7 +21,7 @@ public class JdbcSandbox {
 //            return null;
 //        });
 
-        SqlQueryExecutor sqlQueryExecutor = new SqlQueryExecutor(new OltpConnectionProperties());
+        OltpQueryExecutor sqlQueryExecutor = new OltpQueryExecutor(new OltpConnectionProperties());
         Iterable<?> execute = sqlQueryExecutor.execute("select * from \"user\"");
         System.out.println(execute);
     }

@@ -23,8 +23,8 @@ import static com.dmasso.multidwh.common.enums.DbType.KEY_VALUE;
 public class CypherToRedisTranslator implements Preparer<String> {
 
     private static final Set<String> KEY_VALUE_QUERY_PATTERNS =
-            new HashSet<>(Set.of("MATCH \\(e:entityName \\{entityAttribute: value\\}\\) RETURN e",
-                    "MATCH \\(e:entityName\\) WHERE e.entityAttribute = value RETURN e"));
+            new HashSet<>(Set.of("MATCH \\(\\w:entityName \\{entityAttribute: value\\}\\) RETURN \\w",
+                    "MATCH \\(\\w:entityName\\) WHERE \\w.entityAttribute = value RETURN \\w"));
 
 
     public CypherToRedisTranslator() {
@@ -58,8 +58,8 @@ public class CypherToRedisTranslator implements Preparer<String> {
 
     private void prepareKeyValuePatterns() {
         Set<String> preparedPatterns = KEY_VALUE_QUERY_PATTERNS.stream()
-                .map(s -> s.replace("entityName", "(.*?)")
-                        .replace("entityAttribute", "(.*?)").replace("value", "(.*?)"))
+                .map(s -> s.replace("entityName", "(\\w*?)")
+                        .replace("entityAttribute", "(\\w*?)").replace("value", "(\\w*?)"))
                 .collect(Collectors.toSet());
         KEY_VALUE_QUERY_PATTERNS.clear();
         KEY_VALUE_QUERY_PATTERNS.addAll(preparedPatterns);

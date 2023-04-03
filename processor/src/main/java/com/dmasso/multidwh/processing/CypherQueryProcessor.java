@@ -21,10 +21,10 @@ import static java.util.function.Function.identity;
 public class CypherQueryProcessor implements QueryProcessor<String, Iterable<?>> {
 
     private final Classifier<String, DbType> classifier;
-    private final List<BaseTranslator<String, ?>> translators;
-    private final List<QueryExecutor<? super Object>> executors;
-    private Map<DbType, BaseTranslator<String, ?>> typeTranslatorMap;
-    private Map<DbType, QueryExecutor<? super Object>> typeExecutorMap;
+    private final List<BaseTranslator<String, String>> translators;
+    private final List<QueryExecutor<String>> executors;
+    private Map<DbType, BaseTranslator<String, String>> typeTranslatorMap;
+    private Map<DbType, QueryExecutor<String>> typeExecutorMap;
 
 
     @Override
@@ -32,11 +32,10 @@ public class CypherQueryProcessor implements QueryProcessor<String, Iterable<?>>
         query = prepareForProcessing(query);
         DbType dbType = classifier.classify(query);
 
-        BaseTranslator<String, ?> suitableTranslator = typeTranslatorMap.get(dbType);
-        QueryExecutor<Object> suitableExecutor = typeExecutorMap.get(dbType);
-        // TODO: 22.01.2023 the problem with this is non-unified representation interface.
-        // this fact leads to problems with view/representation of these results for end client
-        return suitableExecutor.execute(suitableTranslator.translate(query));
+        var suitableTranslator = typeTranslatorMap.get(dbType);
+        var suitableExecutor = typeExecutorMap.get(dbType);
+        String translatedQuery = suitableTranslator.translate(query);
+        return suitableExecutor.execute(translatedQuery);
     }
 
     @PostConstruct

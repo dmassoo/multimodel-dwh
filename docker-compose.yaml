@@ -2,13 +2,14 @@ version: '3'
 
 services:
   postgres:
-
     image: postgres
     restart: always
     ports:
       - 5432:5432
     environment:
       POSTGRES_PASSWORD: password
+    volumes:
+      - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies-schema.sql:/docker-entrypoint-initdb.d/movies-schema.sql
     deploy:
       resources:
         limits:
@@ -32,16 +33,13 @@ services:
         soft: 262144
         hard: 262144
 
-#  clickhouse-client:
-#    image: yandex/clickhouse-client
-#    command: [ '--host', 'server' ]
-
   redis:
-    image: redis:6.2-alpine
+    image: 'bitnami/redis:latest'
     restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning --requirepass password
 
   neo4j:
     image: neo4j
@@ -54,3 +52,4 @@ services:
       - NEO4J_dbms_memory_pagecache_size=1G
       - NEO4J_dbms.memory.heap.initial_size=1G
       - NEO4J_dbms_memory_heap_max__size=1G
+      - NEO4J_AUTH=none

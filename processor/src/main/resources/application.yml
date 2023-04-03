@@ -1,13 +1,14 @@
 gtop:
   path: C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies.gtop
-neo4j:
-  uri:
 
-spring:
-  neo4j:
-    uri: ${neo4j.uri}
+
+#spring:
+#  neo4j:
+#    uri: ${neo4j.uri}
 
 #oltp:
 #  url:
 #  user:
 #  password:
+neo4j:
+  uri: bolt://localhost:7687

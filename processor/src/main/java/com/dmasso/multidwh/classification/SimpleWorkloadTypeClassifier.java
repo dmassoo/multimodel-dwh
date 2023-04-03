@@ -13,13 +13,13 @@ import java.util.stream.Stream;
 @Service
 public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> {
 
-    public static final String TYPE_REGEX = "\\(.*?:(.*?)\\)";
+    public static final String TYPE_REGEX = "\\(\\W*:(.*?)\\)";
     public static final String PREDICATE_PATTERN = ".*\s?=\s?.*";
     private static final String OLAP = "OLAP";
     private static final String ROW = "ROW";
     private static final Set<String> KEY_VALUE_QUERY_PATTERNS =
-            new HashSet<>(Set.of("MATCH \\(e:entityName \\{entityAttribute: value\\}\\) RETURN e",
-                    "MATCH \\(e:entityName\\) WHERE e.entityAttribute = value RETURN e"));
+            new HashSet<>(Set.of("MATCH \\(\\w:entityName \\{entityAttribute: value\\}\\) RETURN \\w",
+                    "MATCH \\(\\w:entityName\\) WHERE \\w.entityAttribute = value RETURN \\w"));
     private static final Set<String> AGGREGATING_FUNCTIONS =
             Set.of("count(", "collect(", "sum(", "percentileDisc(", "percentileCont(", "stDev(", "stDevP(");
     private static final Set<String> STRING_MATCHING = Set.of("STARTS WITH", "ENDS WITH", "CONTAINS");
@@ -274,8 +274,8 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private void prepareKeyValuePatterns() {
         Set<String> preparedPatterns = KEY_VALUE_QUERY_PATTERNS.stream()
-                .map(s -> s.replace("entityName", "(.*?)")
-                        .replace("entityAttribute", "(.*?)").replace("value", "(.*?)"))
+                .map(s -> s.replace("entityName", "(\\w*?)")
+                        .replace("entityAttribute", "(\\w*?)").replace("value", "(\\w*?)"))
                 .collect(Collectors.toSet());
         KEY_VALUE_QUERY_PATTERNS.clear();
         KEY_VALUE_QUERY_PATTERNS.addAll(preparedPatterns);
