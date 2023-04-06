@@ -9,6 +9,7 @@ services:
     environment:
       POSTGRES_PASSWORD: password
     volumes:
+      - E:\master-thesis-data\postgres-data:/var/lib/postgresql/data
       - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies-schema.sql:/docker-entrypoint-initdb.d/movies-schema.sql
     deploy:
       resources:
@@ -27,6 +28,9 @@ services:
       - "8123:8123"
       - "9000:9000"
       - "9009:9009"
+    volumes:
+      - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies-ch-schema.sql:/docker-entrypoint-initdb.d/movies-ch-schema.sql
+      - E:\master-thesis-data\clickhouse-data:/var/lib/clickhouse/
     ulimits:
       nproc: 65535
       nofile:

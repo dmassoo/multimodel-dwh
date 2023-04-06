@@ -1,17 +1,17 @@
-create table acted_in
+create table if not exists acted_in
 (
     role      varchar(100),
     person_id INTEGER,
     movie_id  INTEGER
 );
 
-create table directed
+create table if not exists directed
 (
     person_id INTEGER,
     movie_id  INTEGER
 );
 
-create table movie
+create table if not exists movie
 (
     id       INTEGER,
     title    VARCHAR(100),
@@ -19,14 +19,14 @@ create table movie
     tagline  VARCHAR(100)
 );
 
-create table person
+create table if not exists person
 (
     id   INTEGER,
     name VARCHAR(100),
     born INTEGER
 );
 
-create table produced
+create table if not exists produced
 (
     person_id INTEGER,
     movie_id  INTEGER
