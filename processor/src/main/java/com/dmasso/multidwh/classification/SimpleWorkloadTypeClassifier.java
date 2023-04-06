@@ -22,7 +22,12 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                     "MATCH \\(\\w:entityName\\) WHERE \\w.entityAttribute = value RETURN \\w"));
     private static final Set<String> AGGREGATING_FUNCTIONS =
             Set.of("count(", "collect(", "sum(", "percentileDisc(", "percentileCont(", "stDev(", "stDevP(");
-    private static final Set<String> STRING_MATCHING = Set.of("STARTS WITH", "ENDS WITH", "CONTAINS");
+    private static final Set<String> STRING_MATCHING =
+            Set.of(
+                    // "STARTS WITH", it still can be oltp
+                    "ENDS WITH",
+                    "CONTAINS"
+            );
     private static final int MUCH_GREATER_THRESHOLD = 10;
 
     private static final Set<String> OLAP_LIKE_COMPARISON_SIGNS =
