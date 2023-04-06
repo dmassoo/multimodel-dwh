@@ -18,8 +18,11 @@ RETURN m
 
 //OLAP
 // 1) Aggregation
-MATCH (p:person)-[:DIRECTED]-(m:movie)
-WHERE p.name = 'Quentin Tarantino' RETURN count(*) as cnt
+MATCH (m:movie)
+WHERE m.title CONTAINS 'Love' RETURN count(*) as cnt
+// no joins in OLAP
+//MATCH (p:person)-[:DIRECTED]-(m:movie)
+//WHERE p.name = 'Quentin Tarantino' RETURN count(*) as cnt
 // 2) Scan
 MATCH (m:movie) WHERE m.release > 1977 AND m.tagline CONTAINS 'Love' RETURN m
 // 3) Few columns
