@@ -29,13 +29,6 @@ public class CypherQueryExecutor implements QueryExecutor<String> {
     @Override
     public Iterable<?> execute(String query) {
         List<? super Object> result = new ArrayList<>();
-//        try (var session = driver.session()) {
-//            var r = session.executeWrite(tx -> {
-//                var _query = new Query("CREATE (n:movie {id: 1, title: 'Title', release: 1999})");
-//                var _result = tx.run(_query);
-//                return _result.list();
-//            });
-//        }
         try (var session = driver.session()) {
             session.executeRead(tx -> {
                 var _query = new Query(query);
@@ -67,7 +60,6 @@ public class CypherQueryExecutor implements QueryExecutor<String> {
                                     }
                                 }
                         )
-                        //.filter(Objects::nonNull)
                         .toList();
 
                 result.addAll(r);
