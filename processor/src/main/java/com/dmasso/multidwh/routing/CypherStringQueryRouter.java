@@ -2,12 +2,11 @@ package com.dmasso.multidwh.routing;
 
 import com.dmasso.multidwh.common.enums.DbType;
 import org.apache.commons.lang.NotImplementedException;
-import org.springframework.stereotype.Component;
 
 /**
  * Proxy that supposed to analyze input query in Cypher and decide on which DBMS it should be run
  */
-@Component
+//@Component
 public class CypherStringQueryRouter implements BaseRouter<String> {
     @Override
     public DbType route(String query) {

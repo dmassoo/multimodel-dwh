@@ -5,6 +5,7 @@ import com.dmasso.multidwh.translation.Translator;
 import com.google.common.base.Charsets;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.NotImplementedException;
 import org.cytosm.common.gtop.GTopInterfaceImpl;
 import org.cytosm.common.gtop.RelationalGTopInterface;
 import org.cytosm.cypher2sql.PassAvailables;
@@ -16,11 +17,9 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 
-import static com.dmasso.multidwh.common.enums.DbType.OLAP;
-
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CypherToSqlTranslator implements Translator {
+public abstract class CypherToSqlTranslator implements Translator {
     @Value("${gtop.path}")
     private final String pathToGtop;
 
@@ -54,6 +53,6 @@ public class CypherToSqlTranslator implements Translator {
 
     @Override
     public DbType getType() {
-        return OLAP;
+        throw new NotImplementedException("Override");
     }
 }
