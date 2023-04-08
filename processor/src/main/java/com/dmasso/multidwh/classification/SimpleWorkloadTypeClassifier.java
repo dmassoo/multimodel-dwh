@@ -1,5 +1,6 @@
 package com.dmasso.multidwh.classification;
 
+import com.dmasso.multidwh.common.Constants;
 import com.dmasso.multidwh.common.enums.DbType;
 import com.dmasso.multidwh.metadata.*;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,6 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     public static final String PREDICATE_PATTERN = ".*\s?=\s?.*";
     private static final String OLAP = "OLAP";
     private static final String ROW = "ROW";
-    private static final Set<String> KEY_VALUE_QUERY_PATTERNS =
-            new HashSet<>(Set.of("MATCH \\(\\w:entityName \\{entityAttribute: value\\}\\) RETURN \\w",
-                    "MATCH \\(\\w:entityName\\) WHERE \\w.entityAttribute = value RETURN \\w"));
     private static final Set<String> AGGREGATING_FUNCTIONS =
             Set.of("count(", "collect(", "sum(", "percentileDisc(", "percentileCont(", "stDev(", "stDevP(");
     private static final Set<String> STRING_MATCHING =
@@ -31,7 +29,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     private static final int MUCH_GREATER_THRESHOLD = 10;
 
     private static final Set<String> OLAP_LIKE_COMPARISON_SIGNS =
-            Set.of("<>", " > ", " < ", " >= ", " <= " , "IS NULL", "IS NOT NULL");
+            Set.of("<>", " > ", " < ", " >= ", " <= ", "IS NULL", "IS NOT NULL");
 
     private static final Set<String> GRAPH_PATH_RELATIONSHIP_FUNCTIONS =
             Set.of("length(", "nodes(", "relationships(", "count{", "shortestPath(", "allShortestPaths(");
@@ -39,7 +37,6 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     private static final Metadata metadata = MetadataUtility.readMetadata();
 
     public SimpleWorkloadTypeClassifier() {
-        prepareKeyValuePatterns();
     }
 
     @Override
@@ -58,16 +55,17 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         var existingTypes = metadata.getEntities().stream()
                 .flatMap(map -> map.keySet().stream())
                 .collect(Collectors.toSet());
-        if (!existingTypes.containsAll(queryTypes)){
+        if (!existingTypes.containsAll(queryTypes)) {
             throw new IllegalArgumentException("Unknown entity type reference");
         }
     }
+
     private boolean isGraph(String query) {
         if (query.contains("*") || GRAPH_PATH_RELATIONSHIP_FUNCTIONS.stream().anyMatch(query::contains)) {
             // variable length path, path functions, relationships (i.e. focus on paths and relationships
             return true;
         }
-        if(containsSelfJoins(query)) {
+        if (containsSelfJoins(query)) {
             return true;
         }
         if (severalRelationships(query)) {
@@ -76,7 +74,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         return complexPathPattern(query);
     }
 
-    private boolean containsSelfJoins(String  query) {
+    private boolean containsSelfJoins(String query) {
         String typePattern = "\\(.*?:(.*?).*?\\)";
         Pattern compile = Pattern.compile(typePattern);
         Matcher matcher = compile.matcher(query);
@@ -116,7 +114,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     private boolean isKeyValue(String query) {
         // matches k-v pattern
         String matchingPattern = null;
-        for (String pattern : KEY_VALUE_QUERY_PATTERNS) {
+        for (String pattern : Constants.prepareKeyValuePatterns()) {
             if (query.matches(pattern)) matchingPattern = pattern;
         }
         if (matchingPattern != null) {
@@ -158,7 +156,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private boolean isLowEqualsPredicateCardinality(String query) {
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
-        Map<String, Set<String>> typesToAttributes =  getTypesToPredicateAttributes(query, aliasesToTypes);
+        Map<String, Set<String>> typesToAttributes = getTypesToPredicateAttributes(query, aliasesToTypes);
 
         List<Integer> bigRelativeCardinalities = typesToAttributes.entrySet().stream()
                 .flatMap(e -> {
@@ -190,7 +188,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         Pattern typePattern = Pattern.compile(TYPE_REGEX);
         Matcher typeMatcher = typePattern.matcher(query);
         var aliasesTypes = new ArrayList<String>();
-        while(typeMatcher.find()) {
+        while (typeMatcher.find()) {
             aliasesTypes.add(typeMatcher.group());
         }
         return aliasesTypes.stream()
@@ -207,12 +205,12 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                     String typeRegex = String.format("\\(%s.(.*?)\\)", alias);
                     Pattern typePattern = Pattern.compile(typeRegex);
                     Matcher typeMatcher = typePattern.matcher(query);
-                    while(typeMatcher.find()) {
+                    while (typeMatcher.find()) {
                         typesToPredicateAttributes
                                 .computeIfAbsent(aliasesToTypes.get(alias), attributes -> new HashSet<>())
                                 .add(typeMatcher.group(1));
                     }
-                } );
+                });
         return typesToPredicateAttributes;
     }
 
@@ -261,7 +259,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                 .map(p -> p.split("=")[0].split("\\."))
                 .toList();
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
-        Map<String, Set<String>> typesToAttributes =  getTypesToPredicateAttributes(query, aliasesToTypes);
+        Map<String, Set<String>> typesToAttributes = getTypesToPredicateAttributes(query, aliasesToTypes);
         // TODO: 28.02.2023 merge types-attributes in predicates by alias
         // 1) DBType
         // 2) Types
@@ -275,15 +273,6 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private String prepareForClassification(String query) {
         return query.strip().replace("\n", " ").replace("  ", " ");
-    }
-
-    private void prepareKeyValuePatterns() {
-        Set<String> preparedPatterns = KEY_VALUE_QUERY_PATTERNS.stream()
-                .map(s -> s.replace("entityName", "(\\w*?)")
-                        .replace("entityAttribute", "(\\w*?)").replace("value", "(\\w*?)"))
-                .collect(Collectors.toSet());
-        KEY_VALUE_QUERY_PATTERNS.clear();
-        KEY_VALUE_QUERY_PATTERNS.addAll(preparedPatterns);
     }
 
     public static void main(String[] args) {

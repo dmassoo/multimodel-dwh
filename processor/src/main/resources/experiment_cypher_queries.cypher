@@ -1,5 +1,6 @@
 // KV
 MATCH (m:movie) WHERE m.id = 654321 RETURN m;
+//OR MATCH (m:movie {id: 654321}) RETURN m;
 
 // Graph
 // 1) Several relationships
@@ -9,7 +10,6 @@ RETURN m
 MATCH pth = (p:person)-[*1..5]-(pe:person)
 RETURN pth AS path
 // 3) Complex path ?? model is too simple
-
 
 //OLTP
 MATCH (m:movie)
