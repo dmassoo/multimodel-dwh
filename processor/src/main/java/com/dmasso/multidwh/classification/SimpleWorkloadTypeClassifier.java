@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 @Service
 public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> {
 
-    public static final String TYPE_REGEX = "\\(\\W*:(.*?)\\)";
+    public static final String TYPE_REGEX = "\\(\\w*?:(\\w*)\\)";
     public static final String PREDICATE_PATTERN = ".*\s?=\s?.*";
     private static final String OLAP = "OLAP";
-    private static final String ROW = "ROW";
+    private static final String ROW = "row";
     private static final Set<String> AGGREGATING_FUNCTIONS =
             Set.of("count(", "collect(", "sum(", "percentileDisc(", "percentileCont(", "stDev(", "stDevP(");
     private static final Set<String> STRING_MATCHING =
@@ -53,7 +53,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
         Collection<String> queryTypes = new HashSet<>(aliasesToTypes.values());
         var existingTypes = metadata.getEntities().stream()
-                .flatMap(map -> map.keySet().stream())
+                .map(Entity::getName)
                 .collect(Collectors.toSet());
         if (!existingTypes.containsAll(queryTypes)) {
             throw new IllegalArgumentException("Unknown entity type reference");
@@ -75,14 +75,19 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean containsSelfJoins(String query) {
-        String typePattern = "\\(.*?:(.*?).*?\\)";
-        Pattern compile = Pattern.compile(typePattern);
-        Matcher matcher = compile.matcher(query);
-        List<String> types = new ArrayList<>();
-        while (matcher.find()) {
-            types.add(matcher.group(1));
+        Set<String> aliasesTypesString = getAliasesTypesString(query).stream()
+                .map(ast -> ast.replaceAll("[() ]", "").split(":")[1])
+                .collect(Collectors.toSet());
+        List<String> allAts = new ArrayList<>();
+        for (String ats: aliasesTypesString) {
+            for (int index = query.indexOf(ats);
+                 index >= 0;
+                 index = query.indexOf(ats, index + 1))
+            {
+                allAts.add(ats);
+            }
         }
-        return types.size() != 0 && Set.of(types).size() != types.size();
+        return allAts.size() != 0 && new HashSet<>(allAts).size() != allAts.size();
     }
 
     private boolean severalRelationships(String query) {
@@ -162,13 +167,11 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                 .flatMap(e -> {
                     String type = e.getKey();
                     Set<String> attrs = e.getValue();
-                    Map<String, Entity> nameToEntity = getNameToEntity(type);
-                    //todo fix class cast exception
-                    Entity entity = nameToEntity.get(type);
+                    var entity = getEntityByType(type);
                     int cardinality = entity.getCardinality();
                     List<FieldData> schema = entity.getSchema();
                     Stream<FieldData> relatedFields = schema.stream()
-                            .filter(field -> attrs.contains(type));
+                            .filter(field -> attrs.contains(field.getName()));
                     return relatedFields.map(c -> cardinality / c.getCardinality());
                 })
                 .filter(rc -> rc < MUCH_GREATER_THRESHOLD)
@@ -178,23 +181,32 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         return bigRelativeCardinalities.size() == 0;
     }
 
-    private static Map<String, Entity> getNameToEntity(String type) {
+    private static Entity getEntityByType(String type) {
         return metadata.getEntities().stream()
-                .filter(it -> it.containsKey(type)).findFirst()
+                .filter(it -> type.equals(it.getName())).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Запрошенный тип объекта не определен: " + type));
     }
 
     private Map<String, String> getAliasesToTypes(String query) {
-        Pattern typePattern = Pattern.compile(TYPE_REGEX);
-        Matcher typeMatcher = typePattern.matcher(query);
-        var aliasesTypes = new ArrayList<String>();
-        while (typeMatcher.find()) {
-            aliasesTypes.add(typeMatcher.group());
-        }
+        var aliasesTypes = getAliasesTypesString(query);
+
         return aliasesTypes.stream()
                 .map(at -> at.replaceAll("[() ]", ""))
                 .map(at -> at.split(":"))
                 .collect(Collectors.toMap(at -> at[0], at -> at[1]));
+    }
+
+    private static List<String> getAliasesTypesString(String query) {
+        Pattern typePattern = Pattern.compile(TYPE_REGEX);
+        var aliasesTypes = new ArrayList<String>();
+        for (String part: query.split("-")) {
+
+            Matcher typeMatcher = typePattern.matcher(part);
+            while (typeMatcher.find()) {
+                aliasesTypes.add(typeMatcher.group());
+            }
+        }
+        return aliasesTypes;
     }
 
     private Map<String, Set<String>> getTypesToPredicateAttributes(String query, Map<String, String> aliasesToTypes) {
@@ -202,13 +214,15 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
         aliasesToTypes.keySet()
                 .forEach(alias -> {
-                    String typeRegex = String.format("\\(%s.(.*?)\\)", alias);
-                    Pattern typePattern = Pattern.compile(typeRegex);
-                    Matcher typeMatcher = typePattern.matcher(query);
-                    while (typeMatcher.find()) {
-                        typesToPredicateAttributes
-                                .computeIfAbsent(aliasesToTypes.get(alias), attributes -> new HashSet<>())
-                                .add(typeMatcher.group(1));
+                    String typeRegex = String.format("%s\\.(.*)", alias);
+                    for(String token: query.substring(0, query.indexOf("RETURN")).split(" ")) {
+                        Pattern typePattern = Pattern.compile(typeRegex);
+                        Matcher typeMatcher = typePattern.matcher(token);
+                        while (typeMatcher.find()) {
+                            typesToPredicateAttributes
+                                    .computeIfAbsent(aliasesToTypes.get(alias), attributes -> new HashSet<>())
+                                    .add(typeMatcher.group(1));
+                        }
                     }
                 });
         return typesToPredicateAttributes;
@@ -219,8 +233,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         String type;
         if (aliasesToTypes.values().size() == 1) {
             type = aliasesToTypes.values().stream().findFirst().get();
-            Map<String, Entity> nameToEntity = getNameToEntity(type);
-            Entity entity = nameToEntity.get(type);
+            Entity entity = getEntityByType(type);
             Optional<Engine> olapEngineOpt = entity.getEngines().stream().filter(e -> e.getType().equals(OLAP)).findFirst();
             if (olapEngineOpt.isPresent()) {
                 Engine engine = olapEngineOpt.get();
@@ -232,6 +245,8 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             String[] split = query.split("RETURN|return");
             int length = split.length;
             String partAfterReturn = split[length - 1];
+            //todo fix, example query:
+            // MATCH (m:movie) WHERE m.title STARTS WITH 'Love' RETURN m
             String attrsReturnPattern = "\\w*\\.(\\w*)";
             Pattern compile = Pattern.compile(attrsReturnPattern);
             Matcher matcher = compile.matcher(partAfterReturn);
