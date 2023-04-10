@@ -245,8 +245,6 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             String[] split = query.split("RETURN|return");
             int length = split.length;
             String partAfterReturn = split[length - 1];
-            //todo fix, example query:
-            // MATCH (m:movie) WHERE m.title STARTS WITH 'Love' RETURN m
             String attrsReturnPattern = "\\w*\\.(\\w*)";
             Pattern compile = Pattern.compile(attrsReturnPattern);
             Matcher matcher = compile.matcher(partAfterReturn);
@@ -255,10 +253,11 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                 String attrName = matcher.group(1);
                 attrNames.add(attrName);
             }
-            return attrsNumber / attrNames.size() <= 4;
-
+            if (attrNames.size() == 0) {
+                return false;
+            }
+            return attrsNumber / attrNames.size() >= 4;
         }
-
         return false;
     }
 
