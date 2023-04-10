@@ -2,6 +2,7 @@ package com.dmasso.multidwh;
 
 import com.dmasso.multidwh.processing.CypherQueryProcessor;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,7 +29,15 @@ public class Application implements CommandLineRunner {
         while (true) {
             scanner = new Scanner(System.in);
             System.out.println("Enter query or type \"exit\":");
-            String query = scanner.nextLine();
+            StringBuilder qb = new StringBuilder(scanner.nextLine());
+            while (scanner.hasNextLine()) {
+                String query = scanner.nextLine();
+                if (StringUtils.isBlank(query)) {
+                    break;
+                }
+                qb.append(" ").append(query);
+            }
+            String query = qb.toString();
             if (EXIT.equals(query)) {
                 System.exit(0);
             }
