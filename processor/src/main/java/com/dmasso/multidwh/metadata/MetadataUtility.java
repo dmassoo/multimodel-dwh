@@ -14,7 +14,7 @@ public class MetadataUtility {
     public static Metadata readMetadata() {
         Yaml yaml = new Yaml(new Constructor(Metadata.class));
         try {
-            var is = new FileInputStream("processor/src/main/resources/metadata-v2.yaml");
+            var is = new FileInputStream("processor/src/main/resources/metadata-v3.yaml");
             return yaml.load(is);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

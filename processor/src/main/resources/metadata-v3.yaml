@@ -1,0 +1,51 @@
+version: 3
+entities:
+  - name: movie
+    cardinality: 10000
+    schema:
+      - name: id
+        type: UUID
+        cardinality: 10000
+      - name: title
+        type: String
+        cardinality: 9960
+      - name: released
+        type: String
+        cardinality: 123
+      - name: tagline
+        type: String
+        cardinality: 10000
+    engines:
+      - type: OLAP
+        orientation: column
+        index:
+          - id
+          - title
+          - released
+      - type: OLTP
+        orientation: row
+        index:
+          - id
+  - name: person
+    cardinality: 3000
+    schema:
+      - name: id
+        type: UUID
+        cardinality: 3000
+      - name: full_name
+        type: String
+        cardinality: 2900
+      - name: born
+        type: String
+        cardinality: 150
+    engines:
+      - type: OLAP
+        orientation: column
+        index:
+          - id
+          - full_name
+      - type: OLTP
+        orientation: row
+        index:
+          - id
+          - born
