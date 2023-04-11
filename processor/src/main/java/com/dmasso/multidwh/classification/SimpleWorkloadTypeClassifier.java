@@ -3,6 +3,7 @@ package com.dmasso.multidwh.classification;
 import com.dmasso.multidwh.common.Constants;
 import com.dmasso.multidwh.common.enums.DbType;
 import com.dmasso.multidwh.metadata.*;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -36,6 +37,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private static final Metadata metadata = MetadataUtility.readMetadata();
     public static final String KV = "KV";
+    public static final String STARTS_WITH = "STARTS WITH";
 
     public SimpleWorkloadTypeClassifier() {
     }
@@ -43,7 +45,8 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     @Override
     public DbType classify(String query) {
         // TODO: 04.03.2023 can be removed for end2end since prepared in CypherQueryProcessor
-        query = prepareForClassification(query);
+        //query = prepareForClassification(query);
+
         validateQueryEntitiesExistence(query);
         if (isKeyValue(query)) return DbType.KEY_VALUE;
         if (isGraph(query)) return DbType.GRAPH;
@@ -168,6 +171,10 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean isLowEqualsPredicateCardinality(String query) {
+        if (StringUtils.containsIgnoreCase(query, STARTS_WITH)) {
+            // Query contains scan, but still can be OLTP
+            return false;
+        }
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
         Map<String, Set<String>> typesToAttributes = getTypesToPredicateAttributes(query, aliasesToTypes);
 
@@ -178,12 +185,9 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                     var entity = getEntityByType(type);
                     int cardinality = entity.getCardinality();
                     List<FieldData> schema = entity.getSchema();
-                    // TODO: 11.04.2023 fix bug
-                    // MATCH (m:movie) WHERE m.released = 1977 AND m.title STARTS WITH 'Love' RETURN m
-                    // is oltp while must be olap
-                    // don't include attributes with "wide" predicates??
                     Stream<FieldData> relatedFields = schema.stream()
-                            .filter(field -> attrs.contains(field.getName()));
+                            .filter(field -> attrs.contains(field.getName()))
+                            .filter(field -> query.contains(field + " ="));
                     return relatedFields.map(c -> cardinality / c.getCardinality());
                 })
                 .filter(rc -> rc < MUCH_GREATER_THRESHOLD)
