@@ -19,16 +19,20 @@ entities:
       - type: OLAP
         orientation: column
         index:
-          - id
-          - title
-          - released
+          -
+            - id
       - type: OLTP
         orientation: row
         index:
-          - id
+          -
+            - id
+          -
+            - title
+            - released
       - type: KV
         index:
-          - id
+          -
+            - id
   - name: person
     cardinality: 3000
     schema:
@@ -45,10 +49,14 @@ entities:
       - type: OLAP
         orientation: column
         index:
-          - id
-          - full_name
+          -
+            - id
+          -
+            - full_name
       - type: OLTP
         orientation: row
         index:
-          - id
-          - born
+          -
+            - id
+          -
+            - born

@@ -8,6 +8,6 @@ import java.util.List;
 public final class Engine {
     private String type;
     private String orientation;
-    private List<String> index;
+    private List<List<String>> index;
 
 }
