@@ -35,6 +35,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             Set.of("length(", "nodes(", "relationships(", "count{", "shortestPath(", "allShortestPaths(");
 
     private static final Metadata metadata = MetadataUtility.readMetadata();
+    public static final String KV = "KV";
 
     public SimpleWorkloadTypeClassifier() {
     }
@@ -61,7 +62,8 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean isGraph(String query) {
-        if (query.contains("*") || GRAPH_PATH_RELATIONSHIP_FUNCTIONS.stream().anyMatch(query::contains)) {
+        boolean containsVariableLengthPath = query.contains("[*") || query.contains("*]");
+        if (containsVariableLengthPath || GRAPH_PATH_RELATIONSHIP_FUNCTIONS.stream().anyMatch(query::contains)) {
             // variable length path, path functions, relationships (i.e. focus on paths and relationships
             return true;
         }
@@ -129,7 +131,13 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             String entityName = matcher.group(1);
             String attribute = matcher.group(2);
             String value = matcher.group(3);
-            return true;
+            Entity entity = getEntityByType(entityName);
+            long hasKvCache = entity.getEngines().stream()
+                    .filter(e -> KV.equals(e.getType()))
+                    .flatMap(e -> e.getIndex().stream())
+                    .filter(attribute::equals)
+                    .count();
+            return hasKvCache != 0;
         }
         return false;
     }
@@ -170,6 +178,10 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                     var entity = getEntityByType(type);
                     int cardinality = entity.getCardinality();
                     List<FieldData> schema = entity.getSchema();
+                    // TODO: 11.04.2023 fix bug
+                    // MATCH (m:movie) WHERE m.released = 1977 AND m.title STARTS WITH 'Love' RETURN m
+                    // is oltp while must be olap
+                    // don't include attributes with "wide" predicates??
                     Stream<FieldData> relatedFields = schema.stream()
                             .filter(field -> attrs.contains(field.getName()));
                     return relatedFields.map(c -> cardinality / c.getCardinality());

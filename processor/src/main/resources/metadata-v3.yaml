@@ -26,6 +26,9 @@ entities:
         orientation: row
         index:
           - id
+      - type: KV
+        index:
+          - id
   - name: person
     cardinality: 3000
     schema:
