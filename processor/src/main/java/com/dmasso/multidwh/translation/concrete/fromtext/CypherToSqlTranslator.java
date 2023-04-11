@@ -36,7 +36,7 @@ public abstract class CypherToSqlTranslator implements Translator {
 
     private String tryTranslateCypherToSql(GTopInterfaceImpl gTopInterface, String cypherQuery) {
         try {
-            return PassAvailables.cypher2sqlOnExpandedPaths(gTopInterface, cypherQuery).toSQLString();
+            return PassAvailables.cypher2sql(gTopInterface, cypherQuery);
         } catch (Cypher2SqlException e) {
             throw new IllegalArgumentException(e);
         }

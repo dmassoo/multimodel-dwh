@@ -21,7 +21,7 @@ public class OltpQueryExecutor implements QueryExecutor<String> {
     @Override
     public Iterable<?> execute(String query) {
         try (Connection con =
-                     DriverManager.getConnection(properties.getUrl())) {
+                     DriverManager.getConnection(properties.getUrl(), properties.getUser(), properties.getPassword())) {
             Statement statement = con.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             ResultSetMetaData rsmd = resultSet.getMetaData();

@@ -31,11 +31,14 @@ public class CypherQueryProcessor implements QueryProcessor<String, Iterable<?>>
     public Iterable<?> execute(String query) {
         query = prepareForProcessing(query);
         DbType dbType = classifier.classify(query);
-
+        System.out.println("DB type: " + dbType);
         var suitableTranslator = typeTranslatorMap.get(dbType);
         var suitableExecutor = typeExecutorMap.get(dbType);
         String translatedQuery = suitableTranslator.translate(query);
-        return suitableExecutor.execute(translatedQuery);
+        System.out.println("Translated query: " + translatedQuery);
+        Iterable<?> result = suitableExecutor.execute(translatedQuery);
+        System.out.println("Query result: \n\n" + result);
+        return result;
     }
 
     @PostConstruct
