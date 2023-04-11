@@ -187,7 +187,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                     List<FieldData> schema = entity.getSchema();
                     Stream<FieldData> relatedFields = schema.stream()
                             .filter(field -> attrs.contains(field.getName()))
-                            .filter(field -> query.contains(field + " ="));
+                            .filter(field -> query.contains(field.getName() + " ="));
                     return relatedFields.map(c -> cardinality / c.getCardinality());
                 })
                 .filter(rc -> rc < MUCH_GREATER_THRESHOLD)
@@ -279,25 +279,28 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private DbType dbTypeByIndexedPredicates(String query) {
         Pattern pattern = Pattern.compile(PREDICATE_PATTERN);
-        Matcher matcher = pattern.matcher(query);
+        query = query.replace(" =", "=").replace("= ", "=");
         List<String> predicates = new ArrayList<>();
-        while (matcher.find()) {
-            predicates.add(matcher.group(0));
+        for (String token:
+             query.split(" ")) {
+            Matcher matcher = pattern.matcher(token);
+            while (matcher.find()) {
+                predicates.add(matcher.group(0));
+            }
         }
+
         List<String[]> aliasDotAttrsInPredicate = predicates.stream()
-                .map(p -> p.replace(" ", ""))
                 .map(p -> p.split("=")[0].split("\\."))
                 .toList();
         Map<String, String> aliasesToTypes = getAliasesToTypes(query);
         Map<String, Set<String>> typesToAttributes = getTypesToPredicateAttributes(query, aliasesToTypes);
-        // TODO: 28.02.2023 merge types-attributes in predicates by alias
-        // 1) DBType
-        // 2) Types
-        // 3) Aliases
-        // 4) Attributes in predicates
-        // 5) check indices in metadata
-        // TODO: 21.02.2023 implement
-        // method to check if predicate field is indexed in certain database
+        List<Entity> entities = metadata.getEntities()
+                .stream()
+                .filter(e -> typesToAttributes.containsKey(e.getName()))
+                .toList();
+        //all entities and their attributes in the same order as in predicate
+        //compare with indices from metadata
+        //choose engine between olap and oltp with better match
         return DbType.OLTP;
     }
 
@@ -308,11 +311,9 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     public static void main(String[] args) {
         SimpleWorkloadTypeClassifier simpleWorkloadTypeClassifier = new SimpleWorkloadTypeClassifier();
 
-        String query = "MATCH (n:Label)-[r:(R1|Rel2)&Rel3]→(m:Label) RETURN r.name AS name";
-        query = simpleWorkloadTypeClassifier.prepareForClassification(query);
-        System.out.println(simpleWorkloadTypeClassifier.severalRelationships(query));
-
-
-        System.out.println("(Ab: sd)".replaceAll("[() ]", ""));
+        String query = "MATCH (m:movie) " +
+                "WHERE m.title = 'Man' and m.released = 2000 " +
+                "RETURN m";
+        DbType dbType = simpleWorkloadTypeClassifier.dbTypeByIndexedPredicates(query);
     }
 }
