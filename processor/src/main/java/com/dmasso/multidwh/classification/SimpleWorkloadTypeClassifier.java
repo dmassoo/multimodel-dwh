@@ -137,7 +137,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
             Entity entity = getEntityByType(entityName);
             long hasKvCache = entity.getEngines().stream()
                     .filter(e -> KV.equals(e.getType()))
-                    .flatMap(e -> e.getIndex().stream())
+                    .flatMap(e -> e.getIndex().stream().filter(i -> i.size() == 1).map(i -> i.get(0)))
                     .filter(attribute::equals)
                     .count();
             return hasKvCache != 0;
@@ -298,6 +298,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                 .stream()
                 .filter(e -> typesToAttributes.containsKey(e.getName()))
                 .toList();
+        // TODO: 11.04.2023
         //all entities and their attributes in the same order as in predicate
         //compare with indices from metadata
         //choose engine between olap and oltp with better match
