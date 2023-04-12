@@ -44,6 +44,8 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - '6379:6379'
+    volumes:
+      - E:\master-thesis-data\redis-data:/data
 
   neo4j:
     image: neo4j
@@ -58,4 +60,6 @@ services:
       - NEO4J_dbms_memory_heap_max__size=1G
       - NEO4J_AUTH=none
     volumes:
-      - E:\master-thesis-data\neo4j-data:/data
+      - E:\master-thesis-data\neo4j\neo4j-data\data:/data
+      - E:\master-thesis-data\neo4j\neo4j-logs\data:/logs
+      - E:\master-thesis-data\neo4j\neo4j-data\data:/var/lib/neo4j/import
