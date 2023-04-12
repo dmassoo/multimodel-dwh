@@ -80,12 +80,12 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     }
 
     private boolean containsSelfJoins(String query) {
-        Set<String> aliasesTypesString = getAliasesTypesString(query).stream()
+        Set<String> typesInQuery = getAliasesTypesString(query).stream()
                 .map(ast -> ast.replaceAll("[() ]", "").split(":")[1])
                 .collect(Collectors.toSet());
         List<String> allAts = new ArrayList<>();
-        for (String ats: aliasesTypesString) {
-            for (int index = query.indexOf(ats);
+        for (String ats: typesInQuery) {
+            for (int index = query.indexOf(ats + ")");
                  index >= 0;
                  index = query.indexOf(ats, index + 1))
             {
@@ -212,9 +212,9 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
                 .collect(Collectors.toMap(at -> at[0], at -> at[1]));
     }
 
-    private static List<String> getAliasesTypesString(String query) {
+    private static Set<String> getAliasesTypesString(String query) {
         Pattern typePattern = Pattern.compile(TYPE_REGEX);
-        var aliasesTypes = new ArrayList<String>();
+        var aliasesTypes = new HashSet<String>();
         for (String part: query.split("-")) {
 
             Matcher typeMatcher = typePattern.matcher(part);
