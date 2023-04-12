@@ -21,7 +21,7 @@ public class ClassificationTest {
     @Test
     public void testSeveralRelationships_returnsGraph() {
         String query = """
-                MATCH (p:person)-[r:ACTED_IN|DIRECTED|PRODUCED]-(m:movie) WHERE p.id = 55321
+                MATCH (p:person)-[r:ACTED_IN|DIRECTED|PRODUCED]->(m:movie) WHERE p.id = 55321
                 RETURN m
                 """;
         DbType result = classifier.classify(query);
@@ -62,7 +62,7 @@ public class ClassificationTest {
     @Test
     public void testOLAPAgg() {
         var query = """
-                MATCH (p:person)-[:DIRECTED]-(m:movie)
+                MATCH (p:person)-[:DIRECTED]->(m:movie)
                 WHERE p.name = 'Quentin Tarantino' RETURN count(*) as cnt
                 """;
         DbType result = classifier.classify(query);
