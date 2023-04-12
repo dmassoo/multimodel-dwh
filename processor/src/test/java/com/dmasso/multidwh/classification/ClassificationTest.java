@@ -6,6 +6,7 @@ import org.junit.Test;
 public class ClassificationTest {
     private static final Classifier<String, DbType> classifier = new SimpleWorkloadTypeClassifier();
 
+
     @Test
     public void testRelationshipOrientedQuery_returnsGraph() {
         String query = """
@@ -72,7 +73,7 @@ public class ClassificationTest {
     public void testOLAP_LowCard() {
         var query = """
                 MATCH (m:movie)
-                WHERE m.released = 1977 AND m.title STARTS WITH 'Love'
+                WHERE m.released = 1977
                 RETURN m.id, m.released, m.title, m.tagline
                 """;
         DbType result = classifier.classify(query);
@@ -83,7 +84,7 @@ public class ClassificationTest {
     public void testOLAP_fewColsSelectInColOriented() {
         var query = "MATCH (m:movie) WHERE m.released > 2000 RETURN m.title";
         DbType result = classifier.classify(query);
-        assert result == DbType.OLTP;
+        assert result == DbType.OLAP;
     }
 
     @Test
@@ -107,8 +108,4 @@ public class ClassificationTest {
         DbType result = classifier.classify(query);
         assert result == DbType.OLTP;
     }
-
-
-
-
 }
