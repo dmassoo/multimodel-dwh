@@ -39,7 +39,7 @@ entities:
       - name: id
         type: UUID
         cardinality: 3000
-      - name: full_name
+      - name: name
         type: String
         cardinality: 2900
       - name: born
@@ -52,7 +52,7 @@ entities:
           -
             - id
           -
-            - full_name
+            - name
       - type: OLTP
         orientation: row
         index:
