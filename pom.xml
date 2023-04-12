@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>processor</module>
+        <module>data-generator</module>
     </modules>
 
     <properties>
