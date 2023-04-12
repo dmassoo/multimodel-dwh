@@ -45,8 +45,7 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
     @Override
     public DbType classify(String query) {
         // TODO: 04.03.2023 can be removed for end2end since prepared in CypherQueryProcessor
-        //query = prepareForClassification(query);
-
+        query = prepareForClassification(query);
         validateQueryEntitiesExistence(query);
         if (isKeyValue(query)) return DbType.KEY_VALUE;
         if (isGraph(query)) return DbType.GRAPH;
@@ -150,7 +149,6 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
         if (isOlap(query)) {
             return DbType.OLAP;
         }
-        // TODO: 21.02.2023 check indexed cols in predicates
         return dbTypeByIndexedPredicates(query);
     }
 
@@ -307,14 +305,5 @@ public class SimpleWorkloadTypeClassifier implements Classifier<String, DbType> 
 
     private String prepareForClassification(String query) {
         return query.strip().replace("\n", " ").replace("  ", " ");
-    }
-
-    public static void main(String[] args) {
-        SimpleWorkloadTypeClassifier simpleWorkloadTypeClassifier = new SimpleWorkloadTypeClassifier();
-
-        String query = "MATCH (m:movie) " +
-                "WHERE m.title = 'Man' and m.released = 2000 " +
-                "RETURN m";
-        DbType dbType = simpleWorkloadTypeClassifier.dbTypeByIndexedPredicates(query);
     }
 }
