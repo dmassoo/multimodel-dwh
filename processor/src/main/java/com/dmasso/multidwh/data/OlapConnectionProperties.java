@@ -9,7 +9,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @AllArgsConstructor
 @ConfigurationProperties(prefix = "olap")
 @EnableConfigurationProperties
-public class OlapConnectionProperties {
+public class OlapConnectionProperties implements ConnectionProperties {
+
     private final String url = "jdbc:ch://localhost";
     private final String user = "default";
     private final String password = "password";

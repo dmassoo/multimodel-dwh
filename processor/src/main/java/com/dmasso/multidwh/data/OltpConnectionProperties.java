@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @AllArgsConstructor
 @ConfigurationProperties(prefix = "oltp")
 @EnableConfigurationProperties
-public class OltpConnectionProperties {
+public class OltpConnectionProperties implements ConnectionProperties {
     private final String url = "jdbc:postgresql://localhost:5432/postgres";
     private final String user = "postgres";
     private final String password = "password";
