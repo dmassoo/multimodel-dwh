@@ -6,14 +6,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class RedisDataGenerator {
     public static final String KEY_PREFIX = "movie/id/";
-    public static final int DATA_SIZE = 1000;
+    public static final int DATA_SIZE = 100000;
     JedisPool pool;
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -23,12 +26,17 @@ public class RedisDataGenerator {
     }
 
     public void generateData(long size) {
+        StopWatch stopWatch = StopWatch.createStarted();
         Jedis jedis = pool.getResource();
         for (long i = 1; i <= size; i++) {
             Pair<String, String> movieKV = generateRandomMovie(i);
             jedis.set(movieKV.getLeft(), movieKV.getRight());
         }
         System.out.println("Inserted " + size + " entries in Redis with prefix " + KEY_PREFIX);
+        System.out.println("Time elapsed to write:" + stopWatch.getTime(TimeUnit.SECONDS));
+        // about 90s/100k
+        jedis.save();
+        System.out.println("Time elapsed with save on disk:" + stopWatch.getTime(TimeUnit.SECONDS));
     }
 
 
@@ -46,8 +54,5 @@ public class RedisDataGenerator {
 
     public static void main(String[] args) {
         new RedisDataGenerator().generateData(DATA_SIZE);
-//        RedisDataGenerator redisDataGenerator = new RedisDataGenerator();
-//        String s = redisDataGenerator.pool.getResource().get("movie/id/432");
-//        System.out.println(s);
     }
 }
