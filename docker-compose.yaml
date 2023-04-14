@@ -20,7 +20,6 @@ services:
           cpus: '0.5'
           memory: 1000M
 
-#CLICKHOUSE_DB=my_database -e CLICKHOUSE_USER=username -e CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1 -e CLICKHOUSE_PASSWORD=password
   clickhouse-server:
     image: yandex/clickhouse-server
     restart: always
@@ -36,16 +35,20 @@ services:
       nofile:
         soft: 262144
         hard: 262144
+    environment:
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+      - CLICKHOUSE_PASSWORD=password
 
   redis:
     image: 'bitnami/redis:latest'
     restart: always
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_AOF_ENABLED=no
     ports:
       - '6379:6379'
     volumes:
-      - E:\master-thesis-data\redis-data:/data
+      - E:\master-thesis-data\redis-data:/bitnami/redis/data
 
   neo4j:
     image: neo4j
