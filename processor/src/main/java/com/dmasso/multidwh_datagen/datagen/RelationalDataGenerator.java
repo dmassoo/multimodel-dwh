@@ -11,9 +11,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.concurrent.TimeUnit;
 
+import static com.dmasso.multidwh_datagen.datagen.common.Constants.DATA_SIZE;
+
 public interface RelationalDataGenerator {
-    long DATA_SIZE = 100000;
     int BATCH_SIZE = 1000;
+    long PREVIOUS_STOP = 0;
 
     ConnectionProperties getConnectionProperties();
 
@@ -30,7 +32,7 @@ public interface RelationalDataGenerator {
             String title;
             int released;
             String tagline;
-            for (long i = 0; i < DATA_SIZE; i++) {
+            for (long i = PREVIOUS_STOP; i < DATA_SIZE; i++) {
                 title = RandomStringUtils.randomAlphabetic(3, 40);
                 released = RandomUtils.nextInt(1900, 2023);
                 tagline = RandomStringUtils.randomAlphabetic(15, 90);
@@ -43,6 +45,7 @@ public interface RelationalDataGenerator {
                 if (i % getBatchSize() == 0) {
                     System.out.println("Generated " + i + " tuples");
                     st.executeLargeBatch();
+                    Thread.sleep(1_000);
                 }
             }
             st.executeLargeBatch();

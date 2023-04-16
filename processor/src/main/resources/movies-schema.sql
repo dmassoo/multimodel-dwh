@@ -13,7 +13,7 @@ create table if not exists directed
 
 create table if not exists movie
 (
-    id       INTEGER,
+    id       INTEGER PRIMARY KEY,
     title    VARCHAR(100),
     released INTEGER,
     tagline  VARCHAR(100)
@@ -21,7 +21,7 @@ create table if not exists movie
 
 create table if not exists person
 (
-    id   INTEGER,
+    id   INTEGER PRIMARY KEY,
     name VARCHAR(100),
     born INTEGER
 );

@@ -13,10 +13,11 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.dmasso.multidwh_datagen.datagen.common.Constants.DATA_SIZE;
+
 
 public class RedisDataGenerator {
     public static final String KEY_PREFIX = "movie/id/";
-    public static final int DATA_SIZE = 100000;
     JedisPool pool;
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

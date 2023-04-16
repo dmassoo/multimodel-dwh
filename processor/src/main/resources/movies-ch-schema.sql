@@ -5,7 +5,7 @@ create table if not exists movie
     released INTEGER,
     tagline  VARCHAR(100)
 ) ENGINE = MergeTree()
-ORDER BY released;
+ORDER BY id;
 
 create table if not exists person
 (

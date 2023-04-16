@@ -38,6 +38,7 @@ services:
     environment:
       - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
       - CLICKHOUSE_PASSWORD=password
+      - CLICKHOUSE_INIT_TIMEOUT=60
 
   redis:
     image: 'bitnami/redis:latest'
