@@ -11,6 +11,7 @@ services:
     volumes:
       - E:\master-thesis-data\postgres-data:/var/lib/postgresql/data
       - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies-schema.sql:/docker-entrypoint-initdb.d/movies-schema.sql
+      - E:\master-thesis-data\csv:/csv
     deploy:
       resources:
         limits:
@@ -30,6 +31,7 @@ services:
     volumes:
       - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies-ch-schema.sql:/docker-entrypoint-initdb.d/movies-ch-schema.sql
       - E:\master-thesis-data\clickhouse-data:/var/lib/clickhouse/
+      - E:\master-thesis-data\csv:/csv
     ulimits:
       nproc: 65535
       nofile:

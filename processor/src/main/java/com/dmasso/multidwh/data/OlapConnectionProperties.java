@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties
 public class OlapConnectionProperties implements ConnectionProperties {
 
-    private final String url = "jdbc:ch://localhost";
+    private final String url = "jdbc:ch://localhost/default?socket_timeout=3000000";
     private final String user = "default";
     private final String password = "password";
 }

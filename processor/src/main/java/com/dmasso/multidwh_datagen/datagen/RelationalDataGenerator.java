@@ -45,13 +45,13 @@ public interface RelationalDataGenerator {
                 if (i % getBatchSize() == 0) {
                     System.out.println("Generated " + i + " tuples");
                     st.executeLargeBatch();
-                    Thread.sleep(1_000);
+                    Thread.sleep(10_000);
                 }
             }
             st.executeLargeBatch();
 
             conn.close();
-            System.out.println("Time elapsed to generate " + DATA_SIZE + " tuples: " + started.getTime(TimeUnit.MILLISECONDS) + "ms");
+            System.out.println("Time elapsed to generate " + DATA_SIZE + " tuples: " + started.getTime(TimeUnit.SECONDS) + "ms");
         } catch (Exception e) {
             System.err.println("Got an exception! ");
             System.err.println(e.getMessage());

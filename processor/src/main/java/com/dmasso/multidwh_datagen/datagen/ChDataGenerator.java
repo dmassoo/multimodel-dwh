@@ -4,8 +4,7 @@ import com.dmasso.multidwh.data.ConnectionProperties;
 import com.dmasso.multidwh.data.OlapConnectionProperties;
 
 public class ChDataGenerator implements RelationalDataGenerator {
-    public static final int BATCH_SIZE = 1000000; //CH works best with big batches
-
+    public static final int BATCH_SIZE = 500000; //CH works best with big batches
 
     @Override
     public ConnectionProperties getConnectionProperties() {

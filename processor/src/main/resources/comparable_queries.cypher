@@ -11,7 +11,8 @@ RETURN m.id, m.released, m.title, m.tagline
 // SELECT * FROM movie WHERE title like 'Love%';
 
 
-//more like OLAP (released is low card field)
+//Looks like OLAP (released is low card field).
+// However, there is title match, and it is before released "scan" => OLTP
 MATCH (m:movie)
 WHERE m.title = 'Spider Man' and m.released = 2000
 RETURN m.id, m.released, m.title, m.tagline
