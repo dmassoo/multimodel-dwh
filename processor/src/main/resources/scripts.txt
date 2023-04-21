@@ -1,0 +1,21 @@
+docker exec -it multimodel-dwh-postgres-1 psql -U postgres -W postgres
+
+
+neo4j volume
+/var/lib/docker/volumes/72495221296bf7b966a52be6b6cfab0a26f4901c632b166756bbe65ae8a1aae7/_data
+
+
+
+SELECT * FROM movie INTO OUTFILE '/movie.csv';
+
+clickhouse-client --password password -q "INSERT INTO movie FORMAT CSV" < /csv/movie.csv.csv
+
+
+COPY movie
+FROM '/csv/movie.csv.csv'
+DELIMITER ','
+CSV;
+
+CREATE UNIQUE INDEX title_idx ON movie (released, title);
+
+
