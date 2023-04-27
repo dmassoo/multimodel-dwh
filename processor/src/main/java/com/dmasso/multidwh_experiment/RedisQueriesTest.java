@@ -14,8 +14,6 @@ public class RedisQueriesTest {
     public void testKV() {
         var query = "movie/id/7484341";
         query(query);
-        // 3kk 22 ms
-        // 10kk 22 ms as expected
     }
 
     private void query(String query) {
