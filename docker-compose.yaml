@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  postgres:
+  postgres2:
     image: postgres
     restart: always
     ports:
@@ -22,7 +22,7 @@ services:
           cpus: '0.5'
           memory: 1000M
 
-  clickhouse-server:
+  clickhouse-server2:
     image: yandex/clickhouse-server
     restart: always
     ports:
@@ -54,6 +54,17 @@ services:
       - '6379:6379'
     volumes:
       - E:\master-thesis-data\redis-data:/bitnami/redis/data
+
+  redis10m:
+    image: 'bitnami/redis:latest'
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_AOF_ENABLED=no
+    ports:
+      - '6379:6379'
+    volumes:
+      - E:\master-thesis-data\redis-data10:/bitnami/redis/data
 
   neo4j:
     image: neo4j

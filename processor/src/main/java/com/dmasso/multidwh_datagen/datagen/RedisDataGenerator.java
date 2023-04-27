@@ -32,6 +32,10 @@ public class RedisDataGenerator {
         for (long i = 1; i <= size; i++) {
             Pair<String, String> movieKV = generateRandomMovie(i);
             jedis.set(movieKV.getLeft(), movieKV.getRight());
+
+            if (i % 100000 == 0) {
+                System.out.printf("Inserted %s entries in Redis%n", i);
+            }
         }
         System.out.println("Inserted " + size + " entries in Redis with prefix " + KEY_PREFIX);
         System.out.println("Time elapsed to write:" + stopWatch.getTime(TimeUnit.SECONDS));

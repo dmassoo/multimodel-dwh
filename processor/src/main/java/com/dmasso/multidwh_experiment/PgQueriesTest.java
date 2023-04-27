@@ -8,34 +8,53 @@ import java.sql.*;
 import java.util.concurrent.TimeUnit;
 
 public class PgQueriesTest {
+
+    // ram usage 15-70 Mb
     private static final OltpConnectionProperties properties = new OltpConnectionProperties();
 
     @Test
     public void testKV() {
         var query = "SELECT * from movie WHERE movie.id = 654321;";
         query(query);
-        // 3kk 119 ms
+        // 3kk 119 ms (2 cores)
+
+        // 3kk 32 ms index released,title
+        // 10kk 407m/203/41 ms index released,title
     }
 
     @Test
     public void testSimpleWhereStartsWith() {
         var query = "SELECT * FROM movie WHERE title like 'Love%'";
         query(query);
-        // 3kk 13683 ms no index
+        // 3kk 13683 ms no index (2 cores)
+
+        // 3kk 13797 index released,title
+        // 10kk 77401/59385 index released,title
     }
 
     @Test
-    public void testRangeRead() {
+    public void testRangeReadOneCol() {
         var query = "SELECT title FROM movie WHERE released > 2000;";
         query(query);
-        // 3kk 14791 ms no index
+        // 3kk 14791 ms no index (2 cores)
+        // 10kk 65861/63882 index released,title
     }
 
     @Test
     public void testNERead() {
         var query = "SELECT * FROM movie WHERE title != 'Love';";
         query(query);
-        // 3kk 16837 ms no index
+        // 3kk 16837 ms no index (2 cores)
+        // 3kk 14315 ms index
+        // 10kk 60879/63744 index released,title
+    }
+
+    @Test
+    public void testCompoundPredicate() {
+        var query = "SELECT * FROM movie WHERE title = 'Spider Man' and released = 2000;";
+        query(query);
+        // 3kk 2285 ms index
+        // 10kk 58124/57598 index released,title
     }
 
 
