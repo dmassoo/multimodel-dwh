@@ -5,5 +5,5 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class Constants {
-    public static final long DATA_SIZE = 300_000_000L;
+    public static final long DATA_SIZE = 3_000_000L;
 }
