@@ -14,21 +14,27 @@ public class ChQueriesTest {
     public void testKV() {
         var query = "SELECT * from movie WHERE movie.id = 654321;";
         query(query);
-        // 100 ms
+        // 300kk 100 ms
     }
 
     @Test
     public void testSimpleWhereStartsWith() {
         var query = "SELECT * FROM movie WHERE title like 'Love%'";
         query(query);
-        // 306125 ms (306 s)
+        // 300kk 306125 ms (306 s)
     }
 
     @Test
     public void testRangeRead() {
         var query = "SELECT title FROM movie WHERE released > 2000;";
         query(query);
-        // 2562 ms
+        // 300kk 2562 ms
+    }
+
+    @Test
+    public void testNERead() {
+        var query = "SELECT * FROM movie WHERE title != 'Love';";
+        query(query);
     }
 
 
