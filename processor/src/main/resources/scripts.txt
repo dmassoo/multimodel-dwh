@@ -16,7 +16,7 @@ FROM '/csv/movie.csv.csv'
 DELIMITER ',';
 
 CREATE INDEX released_title_idx ON movie (released, title);
-
+CREATE INDEX title_released_idx ON movie (title, released);
 
 clickhouse-client --password password
 psql -U postgres -W postgres

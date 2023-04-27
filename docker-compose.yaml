@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_PASSWORD: password
     volumes:
-      - E:\master-thesis-data\postgres-data:/var/lib/postgresql/data
+      - E:\master-thesis-data\postgres-data-3m:/var/lib/postgresql/data
       - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\movies-schema.sql:/docker-entrypoint-initdb.d/1_movies-schema.sql
       - C:\Users\Dmitrii\Desktop\BIG_DATA\__3sem_Practice\multimodel-dwh\processor\src\main\resources\data-load.sql:/docker-entrypoint-initdb.d/2_data-load.sql
       - E:\master-thesis-data\csv\:/csv

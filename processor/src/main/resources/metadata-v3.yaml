@@ -27,8 +27,8 @@ entities:
           -
             - id
           -
-            - released
             - title
+            - released
       - type: KV
         index:
           -
