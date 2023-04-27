@@ -19,8 +19,8 @@ public class CsvDataGenerator {
         String title;
         int released;
         String tagline;
-        try (FileWriter csvWriter = new FileWriter("E:\\master-thesis-data\\csv\\movie-tiny.csv")) {
-            for (long i = 1; i <= 10; i++) {
+        try (FileWriter csvWriter = new FileWriter("E:\\master-thesis-data\\csv\\movie_" + DATA_SIZE / 1_000_000L + "m.csv")) {
+            for (long i = 1; i <= DATA_SIZE; i++) {
                 title = RandomStringUtils.randomAlphabetic(3, 40);
                 released = RandomUtils.nextInt(1900, 2023);
                 tagline = RandomStringUtils.randomAlphabetic(40, 90);
