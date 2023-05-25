@@ -55,17 +55,6 @@ services:
     volumes:
       - E:\master-thesis-data\redis-data:/bitnami/redis/data
 
-  redis10m:
-    image: 'bitnami/redis:latest'
-    restart: always
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_AOF_ENABLED=no
-    ports:
-      - '6379:6379'
-    volumes:
-      - E:\master-thesis-data\redis-data10:/bitnami/redis/data
-
   neo4j:
     image: neo4j
     restart: always
@@ -82,3 +71,15 @@ services:
       - E:\master-thesis-data\neo4j\neo4j-data\data:/data
       - E:\master-thesis-data\neo4j\neo4j-logs\data:/logs
       - E:\master-thesis-data\neo4j\neo4j-data\data:/var/lib/neo4j/import
+
+  arangodb:
+    image: arangodb:latest
+    environment:
+      ARANGO_ROOT_PASSWORD: rootpassword
+    ports:
+      - 8529:8529
+    volumes:
+      - E:\master-thesis-data\arangodb\data:/var/lib/arangodb3
+      - E:\master-thesis-data\arangodb\appdata:/var/lib/arangodb3-apps
+      - E:\master-thesis-data\csv:/var/lib/csv
+#        arangoimport --file "var/lib/csv/movie_10m.csv" --type csv --translate "id=_key" --collection "movie" --server.database "mydb" --server.password "rootpassword"

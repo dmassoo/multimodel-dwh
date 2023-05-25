@@ -25,3 +25,11 @@ RETURN m.id, m.released, m.title, m.tagline
 
 MATCH (m:movie) WHERE m.released > 2000 RETURN m.title
 // SELECT title FROM movie WHERE released > 2000;
+
+
+
+MATCH (m:movie)
+  WHERE m.title STARTS WITH 'Love'
+RETURN m;
+
+
